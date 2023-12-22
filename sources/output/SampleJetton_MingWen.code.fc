@@ -1,0 +1,114 @@
+#pragma version =0.4.3;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "SampleJetton_MingWen.headers.fc";
+#include "SampleJetton_MingWen.stdlib.fc";
+#include "SampleJetton_MingWen.constants.fc";
+#include "SampleJetton_MingWen.storage.fc";
+
+;;
+;; Contract MingWen functions
+;;
+
+(slice, cell, slice) $MingWen$_contract_init(cell $content, slice $owner) impure inline_ref {
+    var (($self'owner, $self'content, $self'target)) = (null(), null(), null());
+    $self'content = $content;
+    $self'owner = $owner;
+    $self'target = __gen_slice_address_61ab4641fa30d9310391025086eec65d200d79268e1b7cd402565e01ba64be3c();
+    return ($self'owner, $self'content, $self'target);
+}
+
+((slice, cell, slice), ()) $MingWen$_fun_sendTx((slice, cell, slice) $self) impure inline_ref {
+    var (($self'owner, $self'content, $self'target)) = $self;
+    $global_send($SendParameters$_constructor_to_value_bounce_mode_body($self'target, 0, false, (2 + 1), $String$_fun_asComment(__tact_slice_to_str($Cell$_fun_asSlice($self'content)))));
+    return (($self'owner, $self'content, $self'target), ());
+}
+
+;;
+;; Receivers of a Contract MingWen
+;;
+
+((slice, cell, slice), ()) $MingWen$_internal_text_247c7bd5f39e2258d80ac36a0419a1ab5779757825a6cc0e915368f00610a18a((slice, cell, slice) $self) impure inline {
+    var ($self'owner, $self'content, $self'target) = $self;
+    throw_unless(14534, ( (( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) )) ? (true) : (( __tact_slice_eq_bits(my_address(), __tact_context_get_sender()) )) ));
+    ($self'owner, $self'content, $self'target)~$MingWen$_fun_sendTx();
+    ($self'owner, $self'content, $self'target)~$MingWen$_fun_sendTx();
+    $global_send($SendParameters$_constructor_to_value_bounce_mode_body(my_address(), 0, false, (2 + 128), __gen_cell_comment_247c7bd5f39e2258d80ac36a0419a1ab5779757825a6cc0e915368f00610a18a()));
+    return (($self'owner, $self'content, $self'target), ());
+}
+
+;;
+;; Get methods of a Contract MingWen
+;;
+
+_ supported_interfaces() method_id {
+    return (
+        "org.ton.introspection.v0"H >> 128,
+        "org.ton.abi.ipfs.v0"H >> 128,
+        "org.ton.deploy.lazy.v0"H >> 128,
+        "org.ton.chain.workchain.v0"H >> 128
+    );
+}
+
+_ get_abi_ipfs() method_id {
+    return "ipfs://QmXMdQPFuTEoaoQteCu1xqdosiYj188pqJtmzpHronvYCG";
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract MingWen
+;;
+
+((slice, cell, slice), int) $MingWen$_contract_router_internal((slice, cell, slice) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Text Receivers
+    if (op == 0) {
+        var text_op = slice_hash(in_msg);
+        
+        ;; Receive "Mint" message
+        if (text_op == 0x247c7bd5f39e2258d80ac36a0419a1ab5779757825a6cc0e915368f00610a18a) {
+            self~$MingWen$_internal_text_247c7bd5f39e2258d80ac36a0419a1ab5779757825a6cc0e915368f00610a18a();
+            return (self, true);
+        }
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $MingWen$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$MingWen$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $MingWen$_contract_store(self);
+}

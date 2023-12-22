@@ -1,0 +1,56 @@
+;;
+;; Type: SendParameters
+;; TLB: _ bounce:bool to:address value:int257 mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell = SendParameters
+;;
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_bounce_mode_body(slice to, int value, int bounce, int mode, cell body) inline {
+    return (bounce, to, value, mode, body, null(), null());
+}
+
+;;
+;; Type: MingWen
+;;
+
+builder $MingWen$_store(builder build_0, (slice, cell, slice) v) inline {
+    var (v'owner, v'content, v'target) = v;
+    build_0 = __tact_store_address(build_0, v'owner);
+    build_0 = build_0.store_ref(v'content);
+    build_0 = __tact_store_address(build_0, v'target);
+    return build_0;
+}
+
+(slice, ((slice, cell, slice))) $MingWen$_load(slice sc_0) inline {
+    var v'owner = sc_0~__tact_load_address();
+    var v'content = sc_0~load_ref();
+    var v'target = sc_0~__tact_load_address();
+    return (sc_0, (v'owner, v'content, v'target));
+}
+
+(slice, ((cell, slice))) $MingWen$init$_load(slice sc_0) inline {
+    var v'content = sc_0~load_ref();
+    var v'owner = sc_0~__tact_load_address();
+    return (sc_0, (v'content, v'owner));
+}
+
+(slice, cell, slice) $MingWen$_contract_load() impure inline_ref {
+    slice $sc = get_data().begin_parse();
+    __tact_context_sys = $sc~load_ref();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$MingWen$_load();
+    } else {
+        ;; Allow only workchain deployments
+        throw_unless(137, my_address().preload_uint(11) == 1024);
+        (cell content, slice owner) = $sc~$MingWen$init$_load();
+        $sc.end_parse();
+        return $MingWen$_contract_init(content, owner);
+    }
+}
+
+() $MingWen$_contract_store((slice, cell, slice) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_ref(__tact_context_sys);
+    b = b.store_int(true, 1);
+    b = $MingWen$_store(b, v);
+    set_data(b.end_cell());
+}
